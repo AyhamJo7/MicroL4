@@ -230,7 +230,7 @@ git push origin v0.1.0
 ## Next Steps (Roadmap)
 
 ### Short-term
-- [ ] Implement actual syscall handler (int 0x80)
+- [x] Implement actual syscall handler (int 0x80)
 - [ ] Full ELF loader for user programs
 - [ ] Actual user-mode transition (ring 3)
 - [ ] Timer-based preemptive scheduling

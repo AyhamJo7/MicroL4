@@ -7,4 +7,8 @@
 
 void idt_init(void);
 
+struct interrupt_frame;
+void syscall_handler(struct interrupt_frame *frame);
+
+
 #endif /* KERNEL_IDT_H */

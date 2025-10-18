@@ -43,6 +43,8 @@ extern void isr13(void);
 extern void isr14(void);
 extern void isr16(void);
 extern void isr32(void); /* Timer */
+extern void isr128(void); /* Syscall */
+
 
 static void idt_set_gate(uint8_t num, uint64_t handler, uint16_t selector, uint8_t flags) {
     idt[num].offset_low = handler & 0xFFFF;
@@ -77,6 +79,8 @@ void idt_init(void) {
     idt_set_gate(14, (uint64_t)isr14, 0x08, 0x8E);
     idt_set_gate(16, (uint64_t)isr16, 0x08, 0x8E);
     idt_set_gate(32, (uint64_t)isr32, 0x08, 0x8E);
+    idt_set_gate(128, (uint64_t)isr128, 0x08, 0xEE); /* Syscall */
+
 
     /* Load IDT */
     idtr.limit = sizeof(idt) - 1;

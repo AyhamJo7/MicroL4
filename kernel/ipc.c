@@ -77,3 +77,21 @@ int ipc_call(uint64_t dest_tid, ipc_msg_t *send_msg, ipc_msg_t *recv_msg) {
 void ipc_init(void) {
     kprintf("[IPC] IPC system initialized\n");
 }
+
+/* Syscall handler */
+void syscall_handler(struct interrupt_frame *frame) {
+    uint64_t syscall_num = frame->rax;
+    uint64_t arg1 = frame->rdi;
+    /* uint64_t arg2 = frame->rsi; */
+    /* uint64_t arg3 = frame->rdx; */
+
+    switch (syscall_num) {
+    case SYS_DEBUG_PRINT:
+        /* For now, just print to kernel console */
+        kprintf((const char *)arg1);
+        break;
+    default:
+        kprintf("[KERNEL] Unknown syscall: %d\n", syscall_num);
+        break;
+    }
+}
