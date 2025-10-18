@@ -3,6 +3,7 @@
  */
 
 #include "kernel/console.h"
+#include "kernel/idt.h"
 #include "kernel/thread.h"
 #include "kernel/types.h"
 #include "microl4/syscall.h"

@@ -90,13 +90,6 @@ void idt_init(void) {
     kprintf("[IDT] Exception handlers installed\n");
 }
 
-struct interrupt_frame {
-    uint64_t r15, r14, r13, r12, r11, r10, r9, r8;
-    uint64_t rdi, rsi, rbp, rdx, rcx, rbx, rax;
-    uint64_t int_no, err_code;
-    uint64_t rip, cs, rflags, rsp, ss;
-} __attribute__((packed));
-
 void exception_handler(struct interrupt_frame *frame) {
     kprintf("\n[EXCEPTION] Interrupt %d, error code: %x\n", frame->int_no, frame->err_code);
     kprintf("  RIP: %p\n", frame->rip);
