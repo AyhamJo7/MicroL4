@@ -105,7 +105,17 @@ setup_page_tables:
     /* Zero out page tables */
     movl $pml4, %edi
     movl $0, %eax
-    movl $4096, %ecx
+    movl $1024, %ecx
+    rep stosl
+
+    movl $pdpt, %edi
+    movl $0, %eax
+    movl $1024, %ecx
+    rep stosl
+
+    movl $pd, %edi
+    movl $0, %eax
+    movl $1024, %ecx
     rep stosl
 
     /* PML4[0] -> PDPT (identity map first 2MB) */
