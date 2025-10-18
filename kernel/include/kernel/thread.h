@@ -9,12 +9,7 @@
 
 #define MAX_THREADS 64
 
-typedef enum {
-    THREAD_READY,
-    THREAD_RUNNING,
-    THREAD_BLOCKED,
-    THREAD_DEAD
-} thread_state_t;
+typedef enum { THREAD_READY, THREAD_RUNNING, THREAD_BLOCKED, THREAD_DEAD } thread_state_t;
 
 struct thread_control_block {
     uint64_t tid;

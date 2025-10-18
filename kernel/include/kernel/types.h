@@ -19,7 +19,7 @@ typedef uint64_t size_t;
 typedef uint64_t uintptr_t;
 typedef int64_t ssize_t;
 
-#define NULL ((void *)0)
+#define NULL ((void *) 0)
 
 #define true 1
 #define false 0
