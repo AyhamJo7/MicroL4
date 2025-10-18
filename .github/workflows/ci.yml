@@ -1,0 +1,189 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    name: Build Kernel
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            nasm \
+            xorriso \
+            grub-pc-bin \
+            grub-common \
+            qemu-system-x86 \
+            wget \
+            bison \
+            flex \
+            libgmp-dev \
+            libmpc-dev \
+            libmpfr-dev \
+            texinfo \
+            clang-format
+
+      - name: Cache cross-compiler
+        id: cache-toolchain
+        uses: actions/cache@v3
+        with:
+          path: /opt/cross
+          key: ${{ runner.os }}-cross-gcc-12.2.0
+
+      - name: Build cross-compiler
+        if: steps.cache-toolchain.outputs.cache-hit != 'true'
+        run: |
+          export PREFIX="/opt/cross"
+          export TARGET=x86_64-elf
+          export PATH="$PREFIX/bin:$PATH"
+
+          mkdir -p /tmp/toolchain && cd /tmp/toolchain
+
+          # Build binutils
+          wget https://ftp.gnu.org/gnu/binutils/binutils-2.39.tar.gz
+          tar -xzf binutils-2.39.tar.gz
+          mkdir build-binutils && cd build-binutils
+          ../binutils-2.39/configure --target=$TARGET --prefix="$PREFIX" \
+            --with-sysroot --disable-nls --disable-werror
+          make -j$(nproc)
+          sudo make install
+          cd ..
+
+          # Build GCC
+          wget https://ftp.gnu.org/gnu/gcc/gcc-12.2.0/gcc-12.2.0.tar.gz
+          tar -xzf gcc-12.2.0.tar.gz
+          mkdir build-gcc && cd build-gcc
+          ../gcc-12.2.0/configure --target=$TARGET --prefix="$PREFIX" \
+            --disable-nls --enable-languages=c --without-headers
+          make -j$(nproc) all-gcc
+          make -j$(nproc) all-target-libgcc
+          sudo make install-gcc
+          sudo make install-target-libgcc
+
+      - name: Add cross-compiler to PATH
+        run: echo "/opt/cross/bin" >> $GITHUB_PATH
+
+      - name: Verify toolchain
+        run: |
+          x86_64-elf-gcc --version
+          x86_64-elf-ld --version
+
+      - name: Check code formatting
+        run: |
+          find kernel user -name "*.c" -o -name "*.h" | xargs clang-format --dry-run -Werror
+
+      - name: Build kernel
+        run: |
+          make clean
+          make build
+
+      - name: Create ISO
+        run: make iso
+
+      - name: Upload ISO artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: microl4-iso
+          path: microl4.iso
+          retention-days: 7
+
+  test:
+    name: QEMU Smoke Test
+    runs-on: ubuntu-22.04
+    needs: build
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Download ISO artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: microl4-iso
+
+      - name: Install QEMU
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y qemu-system-x86
+
+      - name: Run QEMU smoke test
+        timeout-minutes: 2
+        run: |
+          # Run QEMU in headless mode and capture output
+          timeout 30s qemu-system-x86_64 \
+            -cdrom microl4.iso \
+            -serial file:boot.log \
+            -display none \
+            -no-reboot \
+            || true
+
+          # Check for expected boot messages
+          echo "=== Boot Log ==="
+          cat boot.log
+          echo "================"
+
+          grep -q "MicroL4" boot.log || (echo "ERROR: Boot message not found" && exit 1)
+          grep -q "Booting" boot.log || (echo "ERROR: Boot sequence not found" && exit 1)
+          grep -q "initialized" boot.log || (echo "ERROR: Initialization not complete" && exit 1)
+          grep -q "Hello from user space" boot.log || (echo "ERROR: User space message not found" && exit 1)
+
+          echo "✓ All checks passed"
+
+  lint:
+    name: Lint and Static Analysis
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang-format cppcheck
+
+      - name: Run clang-format check
+        run: |
+          find kernel user -name "*.c" -o -name "*.h" | \
+            xargs clang-format --dry-run -Werror
+
+      - name: Run cppcheck
+        run: |
+          cppcheck --enable=warning,style,performance,portability \
+            --suppress=missingIncludeSystem \
+            --error-exitcode=1 \
+            kernel/ || true
+
+  docs:
+    name: Documentation Check
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Check markdown
+        run: |
+          # Verify all docs exist
+          test -f README.md
+          test -f docs/architecture.md
+          test -f docs/threat-model.md
+          test -f docs/adr/ADR-0001-bootloader.md
+          test -f docs/adr/ADR-0002-ipc-rendezvous.md
+
+      - name: Check for broken links
+        run: |
+          # Basic check for common broken link patterns
+          ! grep -r "](http://localhost" docs/ README.md || \
+            (echo "ERROR: Found localhost links" && exit 1)
