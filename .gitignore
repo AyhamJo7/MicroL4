@@ -28,3 +28,6 @@ toolchain/downloads/
 
 # Generated
 boot/grub/grub.cfg.bak
+
+.gemini/
+gha-creds-*.json
