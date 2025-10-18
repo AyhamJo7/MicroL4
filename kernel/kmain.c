@@ -14,7 +14,8 @@
 extern void ipc_init(void);
 
 /* Simple string length */
-static size_t strlen(const char *str) {
+static size_t strlen(const char *str)
+{
     size_t len = 0;
     while (str[len])
         len++;
@@ -22,7 +23,8 @@ static size_t strlen(const char *str) {
 }
 
 /* Simple number to string conversion */
-static void itoa(uint64_t value, char *buf, int base) {
+static void itoa(uint64_t value, char *buf, int base)
+{
     char *p = buf;
     char *p1, *p2;
     uint64_t ud = value;
@@ -47,7 +49,8 @@ static void itoa(uint64_t value, char *buf, int base) {
 }
 
 /* Simple printf implementation */
-void kprintf(const char *fmt, ...) {
+void kprintf(const char *fmt, ...)
+{
     __builtin_va_list args;
     __builtin_va_start(args, fmt);
 
@@ -89,7 +92,8 @@ void kprintf(const char *fmt, ...) {
     __builtin_va_end(args);
 }
 
-void kmain(uint32_t multiboot_magic) {
+void kmain(uint32_t multiboot_magic)
+{
     /* Initialize console */
     serial_init();
     vga_clear();
@@ -140,7 +144,8 @@ void kmain(uint32_t multiboot_magic) {
 
     kprintf("[MicroL4] System idle. Halting...\n");
 
-    /* Halt */
+    /* Disable interrupts and halt */
+    __asm__ volatile("cli");
     while (1) {
         __asm__ volatile("hlt");
     }

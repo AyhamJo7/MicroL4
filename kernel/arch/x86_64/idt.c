@@ -2,8 +2,9 @@
  * Interrupt Descriptor Table (IDT)
  */
 
-#include "kernel/console.h"
 #include "kernel/idt.h"
+
+#include "kernel/console.h"
 #include "kernel/types.h"
 
 #define IDT_ENTRIES 256
@@ -42,11 +43,11 @@ extern void isr12(void);
 extern void isr13(void);
 extern void isr14(void);
 extern void isr16(void);
-extern void isr32(void); /* Timer */
+extern void isr32(void);  /* Timer */
 extern void isr128(void); /* Syscall */
 
-
-static void idt_set_gate(uint8_t num, uint64_t handler, uint16_t selector, uint8_t flags) {
+static void idt_set_gate(uint8_t num, uint64_t handler, uint16_t selector, uint8_t flags)
+{
     idt[num].offset_low = handler & 0xFFFF;
     idt[num].offset_mid = (handler >> 16) & 0xFFFF;
     idt[num].offset_high = (handler >> 32) & 0xFFFFFFFF;
@@ -56,41 +57,42 @@ static void idt_set_gate(uint8_t num, uint64_t handler, uint16_t selector, uint8
     idt[num].reserved = 0;
 }
 
-void idt_init(void) {
+void idt_init(void)
+{
     /* Clear IDT */
     for (int i = 0; i < IDT_ENTRIES; i++) {
         idt[i] = (struct idt_entry){0};
     }
 
     /* Install exception handlers */
-    idt_set_gate(0, (uint64_t)isr0, 0x08, 0x8E);
-    idt_set_gate(1, (uint64_t)isr1, 0x08, 0x8E);
-    idt_set_gate(2, (uint64_t)isr2, 0x08, 0x8E);
-    idt_set_gate(3, (uint64_t)isr3, 0x08, 0x8E);
-    idt_set_gate(4, (uint64_t)isr4, 0x08, 0x8E);
-    idt_set_gate(5, (uint64_t)isr5, 0x08, 0x8E);
-    idt_set_gate(6, (uint64_t)isr6, 0x08, 0x8E);
-    idt_set_gate(7, (uint64_t)isr7, 0x08, 0x8E);
-    idt_set_gate(8, (uint64_t)isr8, 0x08, 0x8E);
-    idt_set_gate(10, (uint64_t)isr10, 0x08, 0x8E);
-    idt_set_gate(11, (uint64_t)isr11, 0x08, 0x8E);
-    idt_set_gate(12, (uint64_t)isr12, 0x08, 0x8E);
-    idt_set_gate(13, (uint64_t)isr13, 0x08, 0x8E);
-    idt_set_gate(14, (uint64_t)isr14, 0x08, 0x8E);
-    idt_set_gate(16, (uint64_t)isr16, 0x08, 0x8E);
-    idt_set_gate(32, (uint64_t)isr32, 0x08, 0x8E);
-    idt_set_gate(128, (uint64_t)isr128, 0x08, 0xEE); /* Syscall */
-
+    idt_set_gate(0, (uint64_t) isr0, 0x08, 0x8E);
+    idt_set_gate(1, (uint64_t) isr1, 0x08, 0x8E);
+    idt_set_gate(2, (uint64_t) isr2, 0x08, 0x8E);
+    idt_set_gate(3, (uint64_t) isr3, 0x08, 0x8E);
+    idt_set_gate(4, (uint64_t) isr4, 0x08, 0x8E);
+    idt_set_gate(5, (uint64_t) isr5, 0x08, 0x8E);
+    idt_set_gate(6, (uint64_t) isr6, 0x08, 0x8E);
+    idt_set_gate(7, (uint64_t) isr7, 0x08, 0x8E);
+    idt_set_gate(8, (uint64_t) isr8, 0x08, 0x8E);
+    idt_set_gate(10, (uint64_t) isr10, 0x08, 0x8E);
+    idt_set_gate(11, (uint64_t) isr11, 0x08, 0x8E);
+    idt_set_gate(12, (uint64_t) isr12, 0x08, 0x8E);
+    idt_set_gate(13, (uint64_t) isr13, 0x08, 0x8E);
+    idt_set_gate(14, (uint64_t) isr14, 0x08, 0x8E);
+    idt_set_gate(16, (uint64_t) isr16, 0x08, 0x8E);
+    idt_set_gate(32, (uint64_t) isr32, 0x08, 0x8E);
+    idt_set_gate(128, (uint64_t) isr128, 0x08, 0xEE); /* Syscall */
 
     /* Load IDT */
     idtr.limit = sizeof(idt) - 1;
-    idtr.base = (uint64_t)&idt;
+    idtr.base = (uint64_t) &idt;
     __asm__ volatile("lidt %0" : : "m"(idtr));
 
     kprintf("[IDT] Exception handlers installed\n");
 }
 
-void exception_handler(struct interrupt_frame *frame) {
+void exception_handler(struct interrupt_frame *frame)
+{
     kprintf("\n[EXCEPTION] Interrupt %d, error code: %x\n", frame->int_no, frame->err_code);
     kprintf("  RIP: %p\n", frame->rip);
     kprintf("  RSP: %p\n", frame->rsp);
@@ -111,7 +113,8 @@ void exception_handler(struct interrupt_frame *frame) {
 }
 
 /* Weak timer handler (can be overridden by scheduler) */
-__attribute__((weak)) void timer_handler(struct interrupt_frame *frame) {
-    (void)frame;
+__attribute__((weak)) void timer_handler(struct interrupt_frame *frame)
+{
+    (void) frame;
     /* Do nothing by default */
 }

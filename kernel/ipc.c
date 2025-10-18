@@ -11,7 +11,8 @@
 #define IPC_TIMEOUT_INFINITE (-1ULL)
 
 /* Simple IPC: synchronous rendezvous */
-int ipc_send(uint64_t dest_tid, ipc_msg_t *msg) {
+int ipc_send(uint64_t dest_tid, ipc_msg_t *msg)
+{
     /* Find destination thread */
     tcb_t *current = thread_get_current();
     if (!current) {
@@ -24,7 +25,7 @@ int ipc_send(uint64_t dest_tid, ipc_msg_t *msg) {
     }
 
     /* Copy message */
-    ipc_msg_t *buf = (ipc_msg_t *)current->ipc_buffer;
+    ipc_msg_t *buf = (ipc_msg_t *) current->ipc_buffer;
     buf->sender = current->tid;
     buf->tag = msg->tag;
     for (int i = 0; i < 4; i++) {
@@ -41,7 +42,8 @@ int ipc_send(uint64_t dest_tid, ipc_msg_t *msg) {
     return 0;
 }
 
-int ipc_receive(uint64_t *src_tid, ipc_msg_t *msg) {
+int ipc_receive(uint64_t *src_tid, ipc_msg_t *msg)
+{
     tcb_t *current = thread_get_current();
     if (!current) {
         return -1;
@@ -52,7 +54,7 @@ int ipc_receive(uint64_t *src_tid, ipc_msg_t *msg) {
 
     /* Simplified: just return from buffer */
     if (current->ipc_buffer) {
-        ipc_msg_t *buf = (ipc_msg_t *)current->ipc_buffer;
+        ipc_msg_t *buf = (ipc_msg_t *) current->ipc_buffer;
         *src_tid = buf->sender;
         msg->tag = buf->tag;
         for (int i = 0; i < 4; i++) {
@@ -66,7 +68,8 @@ int ipc_receive(uint64_t *src_tid, ipc_msg_t *msg) {
 }
 
 /* Combined send-receive (call/reply pattern) */
-int ipc_call(uint64_t dest_tid, ipc_msg_t *send_msg, ipc_msg_t *recv_msg) {
+int ipc_call(uint64_t dest_tid, ipc_msg_t *send_msg, ipc_msg_t *recv_msg)
+{
     int ret = ipc_send(dest_tid, send_msg);
     if (ret < 0)
         return ret;
@@ -75,12 +78,14 @@ int ipc_call(uint64_t dest_tid, ipc_msg_t *send_msg, ipc_msg_t *recv_msg) {
     return ipc_receive(&src, recv_msg);
 }
 
-void ipc_init(void) {
+void ipc_init(void)
+{
     kprintf("[IPC] IPC system initialized\n");
 }
 
 /* Syscall handler */
-void syscall_handler(struct interrupt_frame *frame) {
+void syscall_handler(struct interrupt_frame *frame)
+{
     uint64_t syscall_num = frame->rax;
     uint64_t arg1 = frame->rdi;
     /* uint64_t arg2 = frame->rsi; */
@@ -89,7 +94,7 @@ void syscall_handler(struct interrupt_frame *frame) {
     switch (syscall_num) {
     case SYS_DEBUG_PRINT:
         /* For now, just print to kernel console */
-        kprintf((const char *)arg1);
+        kprintf((const char *) arg1);
         break;
     default:
         kprintf("[KERNEL] Unknown syscall: %d\n", syscall_num);

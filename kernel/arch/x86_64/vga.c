@@ -8,16 +8,18 @@
 #define VGA_HEIGHT 25
 #define VGA_MEMORY 0xFFFFFFFF800B8000ULL
 
-static uint16_t *vga_buffer = (uint16_t *)VGA_MEMORY;
+static uint16_t *vga_buffer = (uint16_t *) VGA_MEMORY;
 static size_t vga_row = 0;
 static size_t vga_col = 0;
 static uint8_t vga_color = 0x0F; /* White on black */
 
-static inline uint16_t vga_entry(unsigned char c, uint8_t color) {
-    return (uint16_t)c | (uint16_t)color << 8;
+static inline uint16_t vga_entry(unsigned char c, uint8_t color)
+{
+    return (uint16_t) c | (uint16_t) color << 8;
 }
 
-void vga_clear(void) {
+void vga_clear(void)
+{
     for (size_t y = 0; y < VGA_HEIGHT; y++) {
         for (size_t x = 0; x < VGA_WIDTH; x++) {
             const size_t index = y * VGA_WIDTH + x;
@@ -28,7 +30,8 @@ void vga_clear(void) {
     vga_col = 0;
 }
 
-void vga_putchar(char c) {
+void vga_putchar(char c)
+{
     if (c == '\n') {
         vga_col = 0;
         if (++vga_row >= VGA_HEIGHT) {
@@ -48,7 +51,8 @@ void vga_putchar(char c) {
     }
 }
 
-void vga_write(const char *str) {
+void vga_write(const char *str)
+{
     while (*str) {
         vga_putchar(*str++);
     }

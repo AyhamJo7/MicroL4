@@ -27,11 +27,12 @@ boot_entry:
     /* Clear interrupts */
     cli
 
-    /* Save multiboot info pointer */
-    movl %ebx, %edi
-
     /* Set up temporary stack */
     movl $boot_stack_top, %esp
+
+    /* Save multiboot magic on stack (in %eax from GRUB) */
+    /* %eax = magic (0x36d76289), %ebx = multiboot info pointer */
+    pushl %eax
 
     /* Check for long mode support */
     call check_cpuid
@@ -62,6 +63,9 @@ boot_entry:
 
     /* Load 64-bit GDT */
     lgdt gdt64_pointer
+
+    /* Restore multiboot magic to %edi before jumping to long mode */
+    popl %edi
 
     /* Jump to 64-bit code */
     ljmp $0x08, $long_mode_start
@@ -124,20 +128,27 @@ setup_page_tables:
     orl $0x3, %eax                      /* Present + writable */
     movl %eax, (%edi)
 
-    /* PML4[511] -> PDPT (higher half) */
+    /* PML4[511] -> PDPT (higher half -2GB mapping) */
     movl $pml4, %edi
     addl $(511 * 8), %edi
     movl $pdpt, %eax
     orl $0x3, %eax
     movl %eax, (%edi)
 
-    /* PDPT[0] -> PD */
+    /* PDPT[0] -> PD (for identity map) */
     movl $pdpt, %edi
     movl $pd, %eax
     orl $0x3, %eax
     movl %eax, (%edi)
 
-    /* PD[0] -> 2MB page (identity map) */
+    /* PDPT[510] -> PD (for higher half at -2GB) */
+    movl $pdpt, %edi
+    addl $(510 * 8), %edi
+    movl $pd, %eax
+    orl $0x3, %eax
+    movl %eax, (%edi)
+
+    /* PD[0] -> 2MB page at 0x0 (identity map + higher half map) */
     movl $pd, %edi
     movl $0x83, %eax                    /* Present + writable + huge */
     movl %eax, (%edi)

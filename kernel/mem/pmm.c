@@ -2,8 +2,9 @@
  * Physical Memory Manager (Bitmap Allocator)
  */
 
-#include "kernel/console.h"
 #include "kernel/pmm.h"
+
+#include "kernel/console.h"
 #include "kernel/types.h"
 
 #define PAGE_SIZE 4096
@@ -14,25 +15,29 @@ static size_t total_frames = 0;
 static size_t used_frames = 0;
 
 /* Bitmap operations */
-static inline void bitmap_set(size_t frame) {
+static inline void bitmap_set(size_t frame)
+{
     size_t byte = frame / 8;
     size_t bit = frame % 8;
     frame_bitmap[byte] |= (1 << bit);
 }
 
-static inline void bitmap_clear(size_t frame) {
+static inline void bitmap_clear(size_t frame)
+{
     size_t byte = frame / 8;
     size_t bit = frame % 8;
     frame_bitmap[byte] &= ~(1 << bit);
 }
 
-static inline bool bitmap_test(size_t frame) {
+static inline bool bitmap_test(size_t frame)
+{
     size_t byte = frame / 8;
     size_t bit = frame % 8;
     return frame_bitmap[byte] & (1 << bit);
 }
 
-void pmm_init(uint64_t mem_start, uint64_t mem_end) {
+void pmm_init(uint64_t mem_start, uint64_t mem_end)
+{
     /* Initialize all frames as used */
     for (size_t i = 0; i < BITMAP_SIZE; i++) {
         frame_bitmap[i] = 0xFF;
@@ -55,7 +60,8 @@ void pmm_init(uint64_t mem_start, uint64_t mem_end) {
             (total_frames * PAGE_SIZE) / (1024 * 1024));
 }
 
-void pmm_mark_used(uint64_t phys_addr, size_t count) {
+void pmm_mark_used(uint64_t phys_addr, size_t count)
+{
     size_t frame = phys_addr / PAGE_SIZE;
     for (size_t i = 0; i < count; i++) {
         if (!bitmap_test(frame + i)) {
@@ -65,7 +71,8 @@ void pmm_mark_used(uint64_t phys_addr, size_t count) {
     }
 }
 
-void pmm_mark_free(uint64_t phys_addr, size_t count) {
+void pmm_mark_free(uint64_t phys_addr, size_t count)
+{
     size_t frame = phys_addr / PAGE_SIZE;
     for (size_t i = 0; i < count; i++) {
         if (bitmap_test(frame + i)) {
@@ -75,7 +82,8 @@ void pmm_mark_free(uint64_t phys_addr, size_t count) {
     }
 }
 
-uint64_t pmm_alloc_frame(void) {
+uint64_t pmm_alloc_frame(void)
+{
     for (size_t i = 0; i < total_frames; i++) {
         if (!bitmap_test(i)) {
             bitmap_set(i);
@@ -86,7 +94,8 @@ uint64_t pmm_alloc_frame(void) {
     return 0; /* Out of memory */
 }
 
-void pmm_free_frame(uint64_t phys_addr) {
+void pmm_free_frame(uint64_t phys_addr)
+{
     size_t frame = phys_addr / PAGE_SIZE;
     if (frame < total_frames && bitmap_test(frame)) {
         bitmap_clear(frame);
@@ -94,14 +103,17 @@ void pmm_free_frame(uint64_t phys_addr) {
     }
 }
 
-size_t pmm_get_total_frames(void) {
+size_t pmm_get_total_frames(void)
+{
     return total_frames;
 }
 
-size_t pmm_get_used_frames(void) {
+size_t pmm_get_used_frames(void)
+{
     return used_frames;
 }
 
-size_t pmm_get_free_frames(void) {
+size_t pmm_get_free_frames(void)
+{
     return total_frames - used_frames;
 }
