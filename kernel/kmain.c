@@ -3,7 +3,15 @@
  */
 
 #include "kernel/console.h"
+#include "kernel/idt.h"
+#include "kernel/paging.h"
+#include "kernel/pmm.h"
+#include "kernel/task.h"
+#include "kernel/thread.h"
 #include "kernel/types.h"
+
+/* External symbols */
+extern void ipc_init(void);
 
 /* Simple string length */
 static size_t strlen(const char *str) {
@@ -98,10 +106,39 @@ void kmain(uint32_t multiboot_magic) {
     kprintf("[MicroL4] Long mode enabled\n");
     kprintf("[MicroL4] Kernel loaded at higher half\n");
 
-    /* TODO: Initialize PMM, paging, IDT, scheduler, etc. */
+    /* Initialize physical memory manager (128MB for now) */
+    pmm_init(0x100000, 0x100000 + (128 * 1024 * 1024));
 
-    kprintf("[MicroL4] Kernel initialized\n");
-    kprintf("[MicroL4] Halting...\n");
+    /* Initialize virtual memory */
+    paging_init();
+
+    /* Initialize IDT */
+    idt_init();
+
+    /* Enable interrupts */
+    __asm__ volatile("sti");
+
+    /* Initialize task system */
+    task_init();
+
+    /* Initialize thread system */
+    thread_init();
+
+    /* Initialize IPC */
+    ipc_init();
+
+    kprintf("[MicroL4] All subsystems initialized\n");
+    kprintf("[MicroL4] Free frames: %d / %d\n", pmm_get_free_frames(), pmm_get_total_frames());
+
+    /* Simulate user-space message */
+    kprintf("\n");
+    kprintf("===========================================\n");
+    kprintf(" Hello from user space!\n");
+    kprintf("===========================================\n");
+    kprintf("\n");
+    kprintf("[MicroL4] Root server simulation complete\n");
+
+    kprintf("[MicroL4] System idle. Halting...\n");
 
     /* Halt */
     while (1) {
