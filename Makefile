@@ -22,7 +22,7 @@ LDFLAGS := -T linker.ld -nostdlib -z max-page-size=0x1000
 ASFLAGS := --64
 
 # Source files
-ASM_SOURCES := $(ARCH_DIR)/boot.S $(ARCH_DIR)/context.S
+ASM_SOURCES := $(ARCH_DIR)/boot.S $(ARCH_DIR)/context.S $(ARCH_DIR)/isr.S
 C_SOURCES := $(KERNEL_DIR)/kmain.c \
              $(KERNEL_DIR)/thread.c \
              $(KERNEL_DIR)/task.c \
