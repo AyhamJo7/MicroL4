@@ -13,7 +13,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install dependencies
         run: |
@@ -79,10 +79,6 @@ jobs:
           x86_64-elf-gcc --version
           x86_64-elf-ld --version
 
-      - name: Check code formatting
-        run: |
-          find kernel user -name "*.c" -o -name "*.h" | xargs clang-format --dry-run -Werror
-
       - name: Build kernel
         run: |
           make clean
@@ -92,7 +88,7 @@ jobs:
         run: make iso
 
       - name: Upload ISO artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: microl4-iso
           path: microl4.iso
@@ -105,10 +101,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Download ISO artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: microl4-iso
 
@@ -146,17 +142,23 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install tools
         run: |
           sudo apt-get update
           sudo apt-get install -y clang-format cppcheck
 
-      - name: Run clang-format check
+      - name: Check code formatting
         run: |
-          find kernel user -name "*.c" -o -name "*.h" | \
-            xargs clang-format --dry-run -Werror
+          # Format code and check if there are changes
+          find kernel user -name "*.c" -o -name "*.h" -print0 | \
+            xargs -0 clang-format -i --style=file
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "Code is not formatted. Please run 'make format'"
+            git diff
+            exit 1
+          fi
 
       - name: Run cppcheck
         run: |
@@ -171,7 +173,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Check markdown
         run: |
