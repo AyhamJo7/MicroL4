@@ -158,17 +158,17 @@ halt_loop:
     hlt
     jmp halt_loop
 
-.section .data
+.section .boot.data, "aw", @progbits
 .align 16
 gdt64:
     .quad 0                             /* Null descriptor */
     .quad 0x00AF9A000000FFFF            /* Code segment */
     .quad 0x00AF92000000FFFF            /* Data segment */
 gdt64_pointer:
-    .word gdt64_pointer - gdt64 - 1
+    .word . - gdt64 - 1
     .quad gdt64
 
-.section .bss
+.section .boot.bss, "aw", @nobits
 .align 4096
 pml4:
     .space 4096

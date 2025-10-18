@@ -13,6 +13,8 @@ SECTIONS
     {
         *(.multiboot)
         *(.boot_text)
+        *(.boot.data)
+        *(.boot.bss)
     }
 
     /* Move to higher half: -2GB virtual address */
