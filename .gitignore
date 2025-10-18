@@ -1,0 +1,30 @@
+# Build artifacts
+*.o
+*.elf
+*.bin
+*.iso
+*.img
+
+# Build directories
+build/
+iso/
+isodir/
+
+# Toolchain
+toolchain/build/
+toolchain/downloads/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Debug
+*.log
+*.gdb_history
+
+# Generated
+boot/grub/grub.cfg.bak

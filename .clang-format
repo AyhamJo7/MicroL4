@@ -1,0 +1,40 @@
+---
+# Clang-format configuration for MicroL4 kernel
+BasedOnStyle: LLVM
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+ColumnLimit: 100
+
+# Pointers and references
+PointerAlignment: Right
+ReferenceAlignment: Right
+
+# Braces
+BreakBeforeBraces: Linux
+AllowShortFunctionsOnASingleLine: Empty
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+
+# Indentation
+IndentCaseLabels: false
+IndentPPDirectives: AfterHash
+
+# Alignment
+AlignConsecutiveAssignments: false
+AlignConsecutiveDeclarations: false
+AlignOperands: true
+AlignTrailingComments: true
+
+# Spacing
+SpaceBeforeParens: ControlStatements
+SpaceAfterCStyleCast: true
+SpacesInParentheses: false
+
+# Line breaks
+AlwaysBreakAfterReturnType: None
+BreakBeforeBinaryOperators: None
+
+# Sorting
+SortIncludes: true
+IncludeBlocks: Regroup

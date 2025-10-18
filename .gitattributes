@@ -1,0 +1,41 @@
+# Git attributes for MicroL4
+
+# Auto detect text files and normalize line endings to LF
+* text=auto eol=lf
+
+# Source code
+*.c text
+*.h text
+*.S text
+*.s text
+*.asm text
+
+# Scripts
+*.sh text eol=lf
+*.py text eol=lf
+
+# Documentation
+*.md text
+*.txt text
+
+# Build files
+Makefile text
+*.mk text
+
+# Config files
+*.yml text
+*.yaml text
+*.json text
+*.cfg text
+
+# Binaries
+*.bin binary
+*.elf binary
+*.o binary
+*.iso binary
+*.img binary
+
+# Archives
+*.tar binary
+*.gz binary
+*.zip binary

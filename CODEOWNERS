@@ -1,0 +1,23 @@
+# Code ownership for MicroL4
+# See https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default owner for all files
+* @AyhamJo7
+
+# Kernel core
+/kernel/ @AyhamJo7
+
+# Architecture-specific
+/kernel/arch/ @AyhamJo7
+
+# Build system
+/Makefile @AyhamJo7
+/linker.ld @AyhamJo7
+/toolchain/ @AyhamJo7
+
+# Documentation
+/docs/ @AyhamJo7
+*.md @AyhamJo7
+
+# CI/CD
+/.github/ @AyhamJo7
