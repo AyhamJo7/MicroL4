@@ -2,7 +2,7 @@
 .section .text
 .global isr128
 
-extern syscall_handler
+.extern syscall_handler
 
 isr128:
     # Save registers
