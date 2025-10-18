@@ -22,6 +22,7 @@ jobs:
             build-essential \
             nasm \
             xorriso \
+            mtools \
             grub-pc-bin \
             grub-common \
             qemu-system-x86 \
