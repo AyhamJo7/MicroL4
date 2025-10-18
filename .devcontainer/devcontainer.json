@@ -1,0 +1,36 @@
+{
+  "name": "MicroL4 Development",
+  "dockerFile": "../toolchain/Dockerfile",
+  "workspaceFolder": "/workspace",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind",
+  "runArgs": [
+    "--cap-add=SYS_PTRACE",
+    "--security-opt",
+    "seccomp=unconfined"
+  ],
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "terminal.integrated.shell.linux": "/bin/bash",
+        "files.associations": {
+          "*.S": "asm",
+          "*.ld": "ld"
+        },
+        "C_Cpp.default.compilerPath": "/usr/local/cross/bin/x86_64-elf-gcc",
+        "C_Cpp.default.intelliSenseMode": "gcc-x64",
+        "editor.formatOnSave": true,
+        "editor.rulers": [100],
+        "files.trimTrailingWhitespace": true,
+        "files.insertFinalNewline": true
+      },
+      "extensions": [
+        "ms-vscode.cpptools",
+        "ms-vscode.makefile-tools",
+        "xaver.clang-format",
+        "yzhang.markdown-all-in-one"
+      ]
+    }
+  },
+  "postCreateCommand": "make toolchain-check",
+  "remoteUser": "root"
+}
